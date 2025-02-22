@@ -1,3 +1,4 @@
+
 import { useEffect, useRef } from 'react';
 import { useConversation } from '@11labs/react';
 import { supabase } from '@/integrations/supabase/client';
@@ -37,10 +38,11 @@ export const useAIServices = () => {
       const content = data.choices[0].message.content;
 
       // Store content in history
-      const { error } = await supabase
+      const { data: insertData, error } = await supabase
         .from('content_history')
         .insert([
           {
+            user_id: (await supabase.auth.getUser()).data.user?.id,
             content_type: type,
             content: content,
           },
