@@ -1,6 +1,6 @@
-
 import { useEffect, useRef } from 'react';
 import { useConversation } from '@11labs/react';
+import { supabase } from '@/integrations/supabase/client';
 
 const VOICE_ID = "EXAVITQu4vr4xnSDxMaL"; // Sarah's voice ID
 
@@ -34,7 +34,23 @@ export const useAIServices = () => {
       }
 
       const data = await response.json();
-      return data.choices[0].message.content;
+      const content = data.choices[0].message.content;
+
+      // Store content in history
+      const { error } = await supabase
+        .from('content_history')
+        .insert([
+          {
+            content_type: type,
+            content: content,
+          },
+        ]);
+
+      if (error) {
+        console.error('Error storing content history:', error);
+      }
+
+      return content;
     } catch (error) {
       console.error('Error generating content:', error);
       throw error;
