@@ -5,12 +5,17 @@ import AudioVisualizer from "@/components/AudioVisualizer";
 import RadioControls from "@/components/RadioControls";
 import ContentTypeSelector from "@/components/ContentTypeSelector";
 import { Loader2 } from "lucide-react";
+import { useAIServices } from "@/hooks/useAIServices";
+import { useToast } from "@/components/ui/use-toast";
 
 const Index = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [contentType, setContentType] = useState("news");
   const [currentContent, setCurrentContent] = useState("");
+  
+  const { generateContent, synthesizeSpeech } = useAIServices();
+  const { toast } = useToast();
 
   const handlePlayPause = () => {
     setIsPlaying(!isPlaying);
@@ -18,11 +23,21 @@ const Index = () => {
 
   const handleNext = async () => {
     setIsLoading(true);
-    // TODO: Implement content generation and voice synthesis
-    setTimeout(() => {
-      setCurrentContent("This is a placeholder for generated content.");
+    try {
+      const content = await generateContent(contentType);
+      setCurrentContent(content);
+      await synthesizeSpeech(content);
+      setIsPlaying(true);
+    } catch (error) {
+      console.error('Error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to generate or play content. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
   return (
