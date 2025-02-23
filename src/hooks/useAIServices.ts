@@ -42,7 +42,7 @@ export const useAIServices = () => {
           'Authorization': `Bearer ${mistralKeyData.value.trim()}`,
         },
         body: JSON.stringify({
-          model: "mistral-small",
+          model: "mistral-small-latest",
           messages: [{ role: "user", content: prompt }],
           max_tokens: 200,
         }),
