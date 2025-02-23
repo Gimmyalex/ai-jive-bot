@@ -17,11 +17,22 @@ export const useAIServices = () => {
     const prompt = customPrompt || getPromptForType(type);
     
     try {
+      // Get the Mistral API key from Supabase
+      const { data: mistralKeyData, error: mistralKeyError } = await supabase
+        .from('secrets')
+        .select('value')
+        .eq('name', 'MISTRAL_API_KEY')
+        .single();
+
+      if (mistralKeyError || !mistralKeyData) {
+        throw new Error('Could not retrieve Mistral API key');
+      }
+
       const response = await fetch('https://api.mistral.ai/v1/chat/completions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.MISTRAL_API_KEY}`,
+          'Authorization': `Bearer ${mistralKeyData.value}`,
         },
         body: JSON.stringify({
           model: "mistral-tiny",
@@ -31,6 +42,8 @@ export const useAIServices = () => {
       });
 
       if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Mistral API error:', errorData);
         throw new Error('Failed to generate content');
       }
 
@@ -61,11 +74,22 @@ export const useAIServices = () => {
 
   const synthesizeSpeech = async (text: string, volume: number = 1): Promise<void> => {
     try {
+      // Get the ElevenLabs API key from Supabase
+      const { data: elevenLabsKeyData, error: elevenLabsKeyError } = await supabase
+        .from('secrets')
+        .select('value')
+        .eq('name', 'ELEVEN_LABS_API_KEY')
+        .single();
+
+      if (elevenLabsKeyError || !elevenLabsKeyData) {
+        throw new Error('Could not retrieve ElevenLabs API key');
+      }
+
       const response = await fetch('https://api.elevenlabs.io/v1/text-to-speech/' + VOICE_ID, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'xi-api-key': `${process.env.ELEVEN_LABS_API_KEY}`,
+          'xi-api-key': elevenLabsKeyData.value,
         },
         body: JSON.stringify({
           text,
@@ -78,6 +102,8 @@ export const useAIServices = () => {
       });
 
       if (!response.ok) {
+        const errorData = await response.json();
+        console.error('ElevenLabs API error:', errorData);
         throw new Error('Failed to synthesize speech');
       }
 
