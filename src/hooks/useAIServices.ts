@@ -42,7 +42,7 @@ export const useAIServices = () => {
           'Authorization': `Bearer ${mistralKeyData.value}`,
         },
         body: JSON.stringify({
-          model: "mistral-tiny",
+          model: "mistral-small-latest",
           messages: [{ role: "user", content: prompt }],
           max_tokens: 200,
         }),
@@ -107,7 +107,7 @@ export const useAIServices = () => {
         },
         body: JSON.stringify({
           text,
-          model_id: "eleven_monolingual_v1",
+          model_id: "eleven_multilingual_v2",
           voice_settings: {
             stability: 0.5,
             similarity_boost: 0.75,
