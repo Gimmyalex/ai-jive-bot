@@ -34,15 +34,15 @@ export const useAIServices = () => {
         throw new Error('No Mistral API key found');
       }
 
-      console.log('Making request to Mistral API...');
+      console.log('Making request to Mistral API with key present...');
       const response = await fetch('https://api.mistral.ai/v1/chat/completions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${mistralKeyData.value}`,
+          'Authorization': `Bearer ${mistralKeyData.value.trim()}`,
         },
         body: JSON.stringify({
-          model: "mistral-small-latest",
+          model: "mistral-small",
           messages: [{ role: "user", content: prompt }],
           max_tokens: 200,
         }),
@@ -103,11 +103,11 @@ export const useAIServices = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'xi-api-key': elevenLabsKeyData.value,
+          'xi-api-key': elevenLabsKeyData.value.trim(),
         },
         body: JSON.stringify({
           text,
-          model_id: "eleven_multilingual_v2",
+          model_id: "eleven_monolingual_v1",
           voice_settings: {
             stability: 0.5,
             similarity_boost: 0.75,
