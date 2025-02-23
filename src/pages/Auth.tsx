@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Separator } from "@/components/ui/separator";
-import { Github, Mail, Google, Linkedin } from "lucide-react";
+import { Github, Mail, LucideGithub, Linkedin } from "lucide-react";
 
 const Auth = () => {
   const [email, setEmail] = useState("");
@@ -122,7 +122,7 @@ const Auth = () => {
               disabled={true}
               className="w-full"
             >
-              <Google className="h-5 w-5" />
+              <Mail className="h-5 w-5" />
             </Button>
             <Button
               variant="outline"
