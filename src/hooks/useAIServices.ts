@@ -24,10 +24,17 @@ export const useAIServices = () => {
         .eq('name', 'MISTRAL_API_KEY')
         .single();
 
-      if (mistralKeyError || !mistralKeyData) {
+      if (mistralKeyError) {
+        console.error('Error fetching Mistral API key:', mistralKeyError);
         throw new Error('Could not retrieve Mistral API key');
       }
 
+      if (!mistralKeyData?.value) {
+        console.error('No Mistral API key found in database');
+        throw new Error('No Mistral API key found');
+      }
+
+      console.log('Making request to Mistral API...');
       const response = await fetch('https://api.mistral.ai/v1/chat/completions', {
         method: 'POST',
         headers: {
@@ -43,15 +50,15 @@ export const useAIServices = () => {
 
       if (!response.ok) {
         const errorData = await response.json();
-        console.error('Mistral API error:', errorData);
-        throw new Error('Failed to generate content');
+        console.error('Mistral API error details:', errorData);
+        throw new Error(`Mistral API error: ${JSON.stringify(errorData)}`);
       }
 
       const data = await response.json();
       const content = data.choices[0].message.content;
 
       // Store content in history
-      const { data: insertData, error } = await supabase
+      const { error: historyError } = await supabase
         .from('content_history')
         .insert([
           {
@@ -61,8 +68,8 @@ export const useAIServices = () => {
           },
         ]);
 
-      if (error) {
-        console.error('Error storing content history:', error);
+      if (historyError) {
+        console.error('Error storing content history:', historyError);
       }
 
       return content;
@@ -81,11 +88,18 @@ export const useAIServices = () => {
         .eq('name', 'ELEVEN_LABS_API_KEY')
         .single();
 
-      if (elevenLabsKeyError || !elevenLabsKeyData) {
+      if (elevenLabsKeyError) {
+        console.error('Error fetching ElevenLabs API key:', elevenLabsKeyError);
         throw new Error('Could not retrieve ElevenLabs API key');
       }
 
-      const response = await fetch('https://api.elevenlabs.io/v1/text-to-speech/' + VOICE_ID, {
+      if (!elevenLabsKeyData?.value) {
+        console.error('No ElevenLabs API key found in database');
+        throw new Error('No ElevenLabs API key found');
+      }
+
+      console.log('Making request to ElevenLabs API...');
+      const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${VOICE_ID}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -103,8 +117,8 @@ export const useAIServices = () => {
 
       if (!response.ok) {
         const errorData = await response.json();
-        console.error('ElevenLabs API error:', errorData);
-        throw new Error('Failed to synthesize speech');
+        console.error('ElevenLabs API error details:', errorData);
+        throw new Error(`ElevenLabs API error: ${JSON.stringify(errorData)}`);
       }
 
       const audioBlob = await response.blob();
