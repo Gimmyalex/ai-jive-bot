@@ -13,8 +13,8 @@ export const useAIServices = () => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const conversation = useConversation();
 
-  const generateContent = async (type: string): Promise<string> => {
-    const prompt = getPromptForType(type);
+  const generateContent = async (type: string, customPrompt?: string): Promise<string> => {
+    const prompt = customPrompt || getPromptForType(type);
     
     try {
       const response = await fetch('https://api.mistral.ai/v1/chat/completions', {
@@ -59,7 +59,7 @@ export const useAIServices = () => {
     }
   };
 
-  const synthesizeSpeech = async (text: string): Promise<void> => {
+  const synthesizeSpeech = async (text: string, volume: number = 1): Promise<void> => {
     try {
       const response = await fetch('https://api.elevenlabs.io/v1/text-to-speech/' + VOICE_ID, {
         method: 'POST',
@@ -86,6 +86,7 @@ export const useAIServices = () => {
       
       if (audioRef.current) {
         audioRef.current.src = audioUrl;
+        audioRef.current.volume = volume;
         await audioRef.current.play();
       }
     } catch (error) {
